@@ -2,35 +2,20 @@
 #![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
 
-use std::fmt;
+/// Command-line interface runner for non-interactive `tail` and `page` subcommands.
+pub mod cli;
+mod error;
+mod filter;
+mod frame;
+mod highlight;
+mod source;
+mod view;
+mod viewer;
 
-/// Why an input was rejected.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum Error {
-    /// The input is empty or holds only whitespace.
-    Blank,
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Blank => f.write_str("input is blank"),
-        }
-    }
-}
-
-impl std::error::Error for Error {}
-
-/// Trims surrounding whitespace and lower-cases the text.
-///
-/// # Errors
-///
-/// Returns [`Error::Blank`] when nothing is left after trimming, instead of an empty string.
-pub fn normalize(input: &str) -> Result<String, Error> {
-    let trimmed = input.trim();
-    if trimmed.is_empty() {
-        return Err(Error::Blank);
-    }
-    Ok(trimmed.to_lowercase())
-}
+pub use error::ViewError;
+pub use filter::{Filter, Level, detect_level};
+pub use frame::{Status, render_frame, render_highlighted_line};
+pub use highlight::{Span, SpanKind, highlight};
+pub use source::{FileSource, MemSource, Source};
+pub use view::{Change, Line, LogView, ViewOptions};
+pub use viewer::{Action, Key, Viewer};

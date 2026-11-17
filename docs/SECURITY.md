@@ -1,24 +1,16 @@
-# Security notes
+# Security Policy & Threat Model
 
-## Threat model
+## Threat Model
 
-`trysac-tui-log-viewer` is a pure library without I/O. The main risks are:
+Log viewers regularly process untrusted, malformed, or multi-gigabyte log files containing arbitrary byte sequences, binary garbage, or adversarial long lines without newline delimiters.
 
-- **Supply chain**: a compromised dependency or CI action. Mitigation: standard library only,
-  `Cargo.lock` with crates.io checksums and `--locked` builds, `cargo-audit` (RustSec) and
-  OSV-Scanner in the gates, Dependabot weekly updates, actions pinned by commit SHA, minimal
-  workflow permissions.
-- **Leaked secrets**: tokens committed by mistake. Mitigation: `gitleaks` runs in the local gates
-  and in CI; `.env` files are git-ignored.
-- **Insecure code**: memory unsafety, disabled TLS verification, command injection. Mitigation:
-  `unsafe_code = "forbid"` in `Cargo.toml`, clippy with `-D warnings`, and the factory's Semgrep
-  rules (`.semgrep/factory-rules.yml`, `nosemgrep` ignored); fix the code instead of silencing it.
-- **Untrusted input**: callers may pass hostile strings. Mitigation: validate input and return
-  explicit errors; never panic on input; never spawn a shell with untrusted data.
+### Mitigations
 
-## Publishing
-
-Releases are git tags; publishing to crates.io needs a registry token, which is never stored in the
-repository.
-
-To report a vulnerability, see [SECURITY.md](../SECURITY.md).
+- **Resource Exhaustion (Memory & I/O)**:
+  - `ViewOptions::chunk_bytes` (default 64 KiB) bounds the working read buffer.
+  - `ViewOptions::max_line_bytes` (default 64 KiB) caps any single line's allocation and marks overlong lines with `truncated = true`.
+  - `ViewOptions::max_read_per_call` (default 1 MiB) bounds total bytes read from a `Source` per API call.
+- **Malformed Text / Terminal Escape Injection**:
+  - Invalid UTF-8 sequences are lossily decoded into `U+FFFD` without panicking.
+  - Error messages in `ViewError` are capped at 200 characters.
+- **No Unsafe Code**: `#![forbid(unsafe_code)]` is enforced across the crate.
