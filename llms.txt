@@ -1,0 +1,16 @@
+# tui-log-viewer
+
+> Terminal log viewer core that tails, pages and filters multi-gigabyte files through bounded reads, with level highlighting and a follow mode that survives truncation Rust crate `trysac-tui-log-viewer`, library `tui_log_viewer`, MIT licensed,
+> Rust >= 1.88 (edition 2024), standard library only.
+
+## Docs
+
+- [README](README.md): problem, install, usage example
+- [AGENTS](AGENTS.md): commands, folder map, conventions, limits
+- [Architecture](docs/ARCHITECTURE.md): shape of the crate and its public API
+- [Testing](docs/TESTING.md): how to run and extend the tests
+
+## Optional
+
+- [Stack](docs/STACK.md): tools used and discarded
+- [Changelog](CHANGELOG.md): release history
